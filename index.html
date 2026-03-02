@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weathrly — Premium Weather Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700&family=DM+Sans:ital,wght@0,200;0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Background canvas for rain effect -->
+  <canvas id="rain-canvas"></canvas>
+
+  <!-- Background overlay -->
+  <div class="bg-overlay"></div>
+
+  <!-- Main App Container -->
+  <div class="app" id="app">
+
+    <!-- Top Navigation Bar -->
+    <header class="topbar">
+      <div class="topbar__logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 15C3 12.2386 5.23858 10 8 10C8.03451 10 8.069 10.0003 8.10345 10.001C8.55037 7.15875 11.0197 5 14 5C17.3137 5 20 7.68629 20 11C20 11.0736 19.9979 11.1467 19.9937 11.2192C21.1912 11.7473 22 12.9788 22 14.4C22 16.3882 20.3882 18 18.4 18H5C3.89543 18 3 17.1046 3 16V15Z" stroke="rgba(255,255,255,0.9)" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <span>Weathrly</span>
+      </div>
+
+      <div class="topbar__search">
+        <div class="search-wrapper" id="search-wrapper">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <circle cx="11" cy="11" r="8" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <path d="M21 21L16.65 16.65" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="search-input" class="search-input" placeholder="Search city..." autocomplete="off" />
+          <button id="search-btn" class="search-btn" aria-label="Search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="topbar__meta">
+        <div class="date-badge" id="date-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="4" width="18" height="18" rx="2" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+            <path d="M8 2V6M16 2V6M3 9H21" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span id="current-date">Loading...</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dashboard">
+
+      <!-- ─── LEFT PANEL ─── -->
+      <aside class="panel panel--left" id="left-panel">
+        <div class="panel__inner">
+
+          <h2 class="section-title">Today Highlights</h2>
+
+          <div class="highlights-grid">
+            <!-- Wind -->
+            <div class="highlight-card" id="card-wind">
+              <div class="highlight-card__header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Wind Status</span>
+              </div>
+              <div class="highlight-card__value" id="wind-value">—</div>
+              <div class="highlight-card__unit">km/h</div>
+              <div class="highlight-card__sub" id="wind-sub">—</div>
+            </div>
+
+            <!-- Humidity -->
+            <div class="highlight-card" id="card-humidity">
+              <div class="highlight-card__header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linejoin="round"/>
+                </svg>
+                <span>Humidity</span>
+              </div>
+              <div class="highlight-card__value" id="humidity-value">—</div>
+              <div class="highlight-card__unit">%</div>
+              <div class="highlight-card__sub" id="humidity-sub">—</div>
+            </div>
+
+            <!-- UV Index -->
+            <div class="highlight-card" id="card-uv">
+              <div class="highlight-card__header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="4" stroke="rgba(255,230,100,0.8)" stroke-width="1.5"/>
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="rgba(255,230,100,0.8)" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span>UV Index</span>
+              </div>
+              <div class="highlight-card__value" id="uv-value">4.6</div>
+              <div class="highlight-card__unit">UV</div>
+              <div class="highlight-card__sub" id="uv-sub">Moderate UV</div>
+            </div>
+
+            <!-- Visibility -->
+            <div class="highlight-card" id="card-visibility">
+              <div class="highlight-card__header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+                  <circle cx="12" cy="12" r="3" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+                </svg>
+                <span>Visibility</span>
+              </div>
+              <div class="highlight-card__value" id="visibility-value">—</div>
+              <div class="highlight-card__unit">km</div>
+              <div class="highlight-card__sub" id="visibility-sub">—</div>
+            </div>
+          </div>
+
+          <!-- Danger Level -->
+          <div class="danger-card glass-card">
+            <div class="danger-card__top">
+              <div class="danger-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="rgba(255,200,100,0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <span class="danger-percent" id="danger-percent">6.8%</span>
+              <div class="danger-dots">
+                <span class="dot dot--green"></span>
+                <span class="dot dot--yellow"></span>
+                <span class="dot dot--orange"></span>
+                <span class="dot dot--red"></span>
+              </div>
+            </div>
+            <div class="danger-legend">
+              <div><span class="dot dot--green"></span> 0.00% – 0.9% <span class="tag tag--safe">Safe</span></div>
+              <div><span class="dot dot--orange"></span> 12% – 38% <span class="tag tag--danger">Dangerous</span></div>
+              <div><span class="dot dot--yellow"></span> 0.9% – 11%</div>
+              <div><span class="dot dot--red"></span> 39% – 90%</div>
+            </div>
+          </div>
+
+          <!-- World Map Visual -->
+          <div class="map-card glass-card">
+            <h3 class="map-card__title">Select Area</h3>
+            <div class="map-visual" id="map-visual">
+              <svg class="world-svg" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Simplified dotted world map -->
+                <defs>
+                  <pattern id="dot-pattern" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
+                    <circle cx="1" cy="1" r="0.8" fill="rgba(255,255,255,0.25)"/>
+                  </pattern>
+                  <mask id="world-mask">
+                    <!-- North America -->
+                    <ellipse cx="90" cy="75" rx="52" ry="38" fill="white"/>
+                    <!-- South America -->
+                    <ellipse cx="105" cy="135" rx="28" ry="42" fill="white"/>
+                    <!-- Europe -->
+                    <ellipse cx="200" cy="65" rx="28" ry="22" fill="white"/>
+                    <!-- Africa -->
+                    <ellipse cx="205" cy="120" rx="30" ry="45" fill="white"/>
+                    <!-- Asia -->
+                    <ellipse cx="300" cy="72" rx="68" ry="38" fill="white"/>
+                    <!-- Australia -->
+                    <ellipse cx="325" cy="145" rx="30" ry="22" fill="white"/>
+                  </mask>
+                </defs>
+                <rect width="400" height="200" fill="url(#dot-pattern)" mask="url(#world-mask)"/>
+                <!-- City marker -->
+                <circle class="map-marker" cx="90" cy="88" r="5" fill="rgba(255,200,50,0.9)"/>
+                <circle class="map-marker" cx="90" cy="88" r="9" fill="rgba(255,200,50,0.2)"/>
+                <circle class="map-marker" cx="200" cy="72" r="4" fill="rgba(255,150,50,0.9)"/>
+                <circle class="map-marker" cx="200" cy="72" r="8" fill="rgba(255,150,50,0.2)"/>
+                <circle class="map-marker-main" cx="300" cy="80" r="6" fill="rgba(100,200,255,0.9)"/>
+                <circle class="map-marker-main" cx="300" cy="80" r="12" fill="rgba(100,200,255,0.2)"/>
+              </svg>
+              <div class="map-location" id="map-location">—</div>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- ─── CENTER PANEL ─── -->
+      <section class="panel panel--center" id="center-panel">
+        <div class="panel__inner">
+
+          <!-- Loading State -->
+          <div class="loading-state" id="loading-state">
+            <div class="loader">
+              <div class="loader__ring"></div>
+              <div class="loader__ring loader__ring--2"></div>
+              <div class="loader__ring loader__ring--3"></div>
+            </div>
+            <p>Fetching weather data...</p>
+          </div>
+
+          <!-- Error State -->
+          <div class="error-state hidden" id="error-state">
+            <div class="error-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="rgba(255,100,100,0.7)" stroke-width="1.5"/>
+                <path d="M12 8v4m0 4h.01" stroke="rgba(255,100,100,0.7)" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 id="error-title">City not found</h3>
+            <p id="error-msg">Please check the city name and try again.</p>
+          </div>
+
+          <!-- Weather Content -->
+          <div class="weather-content hidden" id="weather-content">
+
+            <div class="weather-main">
+              <div class="weather-condition" id="weather-condition">—</div>
+              <div class="weather-meta-row">
+                <div class="temperature-block">
+                  <span class="temperature" id="temperature">—</span>
+                  <span class="temperature-degree">°</span>
+                </div>
+                <div class="hi-lo">
+                  <div class="hi-lo__item">
+                    <span class="hi-lo__label">H</span>
+                    <span class="hi-lo__val" id="temp-high">—°</span>
+                  </div>
+                  <div class="hi-lo__item">
+                    <span class="hi-lo__label">L</span>
+                    <span class="hi-lo__val" id="temp-low">—°</span>
+                  </div>
+                </div>
+              </div>
+              <p class="weather-description" id="weather-description">—</p>
+              <div class="city-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+                  <circle cx="12" cy="10" r="3" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+                </svg>
+                <span id="city-name">—</span>
+              </div>
+            </div>
+
+            <!-- 5-Day Forecast -->
+            <div class="forecast-section">
+              <div class="forecast-row" id="forecast-row">
+                <!-- Populated by JS -->
+              </div>
+              <!-- Animated Wave Chart -->
+              <div class="wave-chart">
+                <svg id="wave-svg" viewBox="0 0 700 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" style="stop-color:rgba(255,255,255,0.3)"/>
+                      <stop offset="100%" style="stop-color:rgba(255,255,255,0)"/>
+                    </linearGradient>
+                    <filter id="glow">
+                      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                  </defs>
+                  <path id="wave-fill" d="" fill="url(#waveGrad)"/>
+                  <path id="wave-line" d="" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2" filter="url(#glow)"/>
+                  <circle id="wave-dot" cx="350" cy="40" r="5" fill="white" filter="url(#glow)"/>
+                  <line id="wave-vline" x1="350" y1="0" x2="350" y2="80" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-dasharray="4 4"/>
+                </svg>
+              </div>
+              <div class="forecast-days" id="forecast-days">
+                <!-- Day labels populated by JS -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ─── RIGHT PANEL ─── -->
+      <aside class="panel panel--right" id="right-panel">
+        <div class="panel__inner">
+
+          <!-- Wind Graph -->
+          <div class="glass-card wind-graph-card">
+            <div class="card-header">
+              <div class="card-header__left">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Wind Status</span>
+              </div>
+              <button class="refresh-btn" id="refresh-btn" aria-label="Refresh">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M1 4v6h6M23 20v-6h-6" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            <!-- Wind bar chart -->
+            <div class="wind-chart-wrap">
+              <svg id="wind-chart" viewBox="0 0 240 80" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="barGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:rgba(255,255,255,0.6)"/>
+                    <stop offset="100%" style="stop-color:rgba(255,255,255,0.05)"/>
+                  </linearGradient>
+                  <linearGradient id="lineGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:rgba(255,255,255,0.1)"/>
+                    <stop offset="50%" style="stop-color:rgba(255,255,255,0.8)"/>
+                    <stop offset="100%" style="stop-color:rgba(255,255,255,0.1)"/>
+                  </linearGradient>
+                </defs>
+                <!-- Animated line -->
+                <path id="wind-line-path" d="" fill="none" stroke="url(#lineGrad2)" stroke-width="1.5"/>
+                <!-- Bars -->
+                <g id="wind-bars"></g>
+              </svg>
+            </div>
+            <div class="wind-graph-footer">
+              <div>
+                <span class="wind-speed-big" id="wind-speed-right">—</span>
+                <span class="wind-unit">km/h</span>
+              </div>
+              <span class="wind-time" id="wind-time">—</span>
+            </div>
+          </div>
+
+          <!-- Sunrise & Sunset -->
+          <div class="glass-card sunrise-card">
+            <div class="card-header">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M17 18a5 5 0 0 0-10 0" stroke="rgba(255,220,100,0.8)" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M12 2v3M4.22 10.22l2.12 2.12M1 18h2m16 0h2M17.66 12.34l2.12-2.12M21 18a9 9 0 0 0-18 0" stroke="rgba(255,220,100,0.8)" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <span>Sunrise &amp; Sunset</span>
+            </div>
+            <div class="sunrise-arc-wrap">
+              <svg id="sun-arc" viewBox="0 0 240 130" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:rgba(255,180,50,0.8)"/>
+                    <stop offset="100%" style="stop-color:rgba(255,100,50,0.8)"/>
+                  </linearGradient>
+                </defs>
+                <!-- Base arc (dashed) -->
+                <path d="M 20 110 A 100 100 0 0 1 220 110" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2" stroke-dasharray="5 5"/>
+                <!-- Active arc -->
+                <path id="sun-arc-active" d="" fill="none" stroke="url(#arcGrad)" stroke-width="2.5" stroke-linecap="round"/>
+                <!-- Sun ball -->
+                <circle id="sun-ball" cx="120" cy="10" r="7" fill="rgba(255,220,80,1)">
+                  <animate attributeName="r" values="7;9;7" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <circle id="sun-glow" cx="120" cy="10" r="14" fill="rgba(255,220,80,0.2)">
+                  <animate attributeName="r" values="14;18;14" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Sunrise dot -->
+                <circle cx="20" cy="110" r="4" fill="rgba(255,200,50,0.9)"/>
+                <!-- Sunset dot -->
+                <circle cx="220" cy="110" r="4" fill="rgba(255,100,50,0.9)"/>
+                <!-- Ground line -->
+                <line x1="10" y1="110" x2="230" y2="110" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+              </svg>
+            </div>
+            <div class="sunrise-times">
+              <div class="sun-time-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M17 18a5 5 0 0 0-10 0" stroke="rgba(255,200,80,0.8)" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M12 9v3m0 0-2-2m2 2 2-2" stroke="rgba(255,200,80,0.8)" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <div>
+                  <div class="sun-label">Sunrise</div>
+                  <div class="sun-val" id="sunrise-time">5:50 AM</div>
+                </div>
+              </div>
+              <div class="sun-time-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M17 18a5 5 0 0 0-10 0" stroke="rgba(255,140,50,0.8)" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M12 12v3m0 0-2-2m2 2 2-2" stroke="rgba(255,140,50,0.8)" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <div>
+                  <div class="sun-label">Sunset</div>
+                  <div class="sun-val" id="sunset-time">8:10 PM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pressure Card -->
+          <div class="glass-card pressure-card">
+            <div class="card-header">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 0v4m0 8v4M2 12h4m12 0h4" stroke="rgba(100,200,255,0.8)" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <span>Pressure</span>
+            </div>
+            <div class="pressure-gauge">
+              <svg id="pressure-gauge-svg" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 10 70 A 50 50 0 0 1 110 70" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8" stroke-linecap="round"/>
+                <path id="pressure-arc" d="M 10 70 A 50 50 0 0 1 110 70" fill="none" stroke="rgba(100,200,255,0.7)" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 200"/>
+                <text id="pressure-val" x="60" y="60" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-family="Outfit" font-size="16" font-weight="300">—</text>
+                <text x="60" y="75" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-family="Outfit" font-size="8">hPa</text>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
